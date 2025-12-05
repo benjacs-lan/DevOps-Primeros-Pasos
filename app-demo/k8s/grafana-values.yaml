@@ -1,0 +1,58 @@
+# Grafana Helm values
+adminPassword: admin
+
+service:
+  type: LoadBalancer
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server.monitoring.svc.cluster.local
+        access: proxy
+        isDefault: true
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    app-demo-dashboard:
+      json: |
+        {
+          "dashboard": {
+            "title": "App Demo Metrics",
+            "panels": [
+              {
+                "title": "Request Rate",
+                "targets": [
+                  {
+                    "expr": "rate(flask_http_request_total[5m])"
+                  }
+                ],
+                "type": "graph"
+              },
+              {
+                "title": "Request Duration",
+                "targets": [
+                  {
+                    "expr": "flask_http_request_duration_seconds_sum / flask_http_request_duration_seconds_count"
+                  }
+                ],
+                "type": "graph"
+              }
+            ]
+          }
+        }
